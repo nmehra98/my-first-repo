@@ -1,67 +1,106 @@
-print("Hello world")
-print ('what\'s up?')
-print ('Let\'s get started...')
+from spydetails import spy, spy
+from datetime import datetime
 
-#####asking name#####
-def spychat():
-    spy_name = input("Welcome to spy chat, you must tell me your spy name first: ")
-    if len(spy_name) > 0:
-        print ('Welcome ' + spy_name + '. Glad to have you back with us.')
+print ("Hello!")
+# This will print Hello!
 
-   #####providing salutation######
-        spy_salutation = input("What should we call you (Mr. or Ms.)?")
-        spy_salutation + " " + spy_name
-        spy_name = spy_salutation + " " + spy_name
-        print(spy_name)
-        print ("Alright " + " " + spy_name +". I'd like to know a little bit more about you before we proceed...")
+print('let\'s get started')
+# Project will get started
+
+question = "Do you want to continue as " + spy.salutation + " " + spy.name + " (Y/N)? "
+# This will ask user to continue as Spy Name with salutation
+
+existing = input(question)
+
+STATUS_MESSAGES=["Neeti", "Mehra"]
+
+# Function to add status
+def add_status():
+    updated_status_message = None
+    if spy.current_status_message != None:
+        print ("Your current status message is " + spy.current_status_message + "\n")
     else:
-        print ("A spy needs to have a valid name. Try again please.")
+        print ("You don\'t have any status message currently \n")
+    default = input("Do you want to select from the older status (y/n)? ")
+    # upper is used to convert the input into upper case
+    if default.upper() == "N":
+        new_status_message = input("What status message do you want to set?")
+
+        if len(new_status_message) > 0:
+            updated_status_message = new_status_message
+            STATUS_MESSAGES.append(new_status_message)
+    elif default.upper() == "Y":
+        item_position = 1
+        for message in STATUS_MESSAGES:
+            print ('%d. %s' % (item_position, message))
+            item_position = item_position + 1
+        message_selection = int(input("\nChoose from the above messages "))
+        if len(STATUS_MESSAGES) >= message_selection:
+            updated_status_message = STATUS_MESSAGES[message_selection - 1]
+    return updated_status_message
 
 
-    spy_age = 0
-    spy_rating = 0.0
-    spy_is_online = False
-    spy_age = int(input("What is your age?"))
-    if spy_age > 12 and spy_age < 50:
-        spy_rating = float(input("What is your spy rating?"))
-    else:
-        print ('Sorry you are not of the correct age to be a spy')
-    if spy_rating > 4.5:
-        print ('Great ace!')
-    elif spy_rating > 3.5 and spy_rating <= 4.5:
-        print ('You are one of the good ones.')
-    elif spy_rating >= 2.5 and spy_rating <= 3.5:
-        print ('You can always do better')
-    else:
-        print ('We can always use somebody to help in the office.')
-    spy_is_online = True
-    print ('Authentication complete. Welcome ', spy_name)
-    print ('Your age =' , spy_age)
-    print ('Your spy rating=',spy_rating)
+# Function to start chat
+def start_chat(spy):
+    print ("Authentication complete. Welcome " + spy.name + " age: " \
+          + str(spy.age) + " and rating of: " + str(spy.rating) + " Proud to have you onboard")
+    current_status_message=None
+    show_menu = True
 
-#################################
+    while show_menu:
+        menu_choices = "What do you want to do? \n 1. Add a status update \n 2. Add a friend \n" \
+                       " 3. Send a secret message \n 4. Read a secret message \n" \
+                       " 5. Read Chats from a user \n 6. Close Application \n"
+        menu_choice = input(menu_choices)
 
-def spy_chat():
-        print ("What do you want to do?")
-        menu_choices="1. Add a status update \n2. Exit the application \nInput:-"
-        menu_choice=input(menu_choices)
-        if menu_choice=="1":
-                from spydetails import status
-                print ("Your current status is: %s" % status)  ####Display your current status####
+        if len(menu_choice) > 0:
+            menu_choice = int(menu_choice)
+
+            if menu_choice == 1:
+                spy.current_status_message = add_status()
+            elif menu_choice == 2:
+                number_of_friends = add_friend()
+                print ("You have %d friends" % (number_of_friends))
+            elif menu_choice == 3:
+                send_a_message()
+            elif menu_choice == 4:
+                read_a_message()
+            elif menu_choice == 5:
+                read_chat_history()
+            else:
+                show_menu = False
+if existing == "Y":
+    start_chat(spy)
+else:
+
+    spy = Spy('','',0,0.0)
+
+    spy.name = input("What is your name?")
+
+    if len(spy.name) > 0:
+        print ("Welcome " + spy.name + ". Glad to have you back with us.")
+        spy.salutation = input("What should we call you (Mr. or Ms.)?")
+        spy.name = spy.salutation + " " + spy.name
+        print ("Alright " + spy.name + ". I'd like to know a little bit more about you before we proceed...")
+        spy.age = 0
+        spy.rating = 0.0
+        spy.is_online = False
+        spy.age = int(input("What is your age?"))
+        if 18 < spy.age < 65:
+            spy.rating = float(input("What is your spy rating?"))
+            if spy.rating > 4.5:
+                print ("Great ace!")
+            elif 3.5 < spy.rating <= 4.5:
+                print ("You are one of the good ones.")
+            elif 2.5 <= spy.rating <= 3.5:
+                print ("You can always do better")
+            else:
+                print ("We can always use somebody to help in the office.")
+            spy.is_online = True
+            start_chat(spy)
 
         else:
-            print ("Quitting...")   ####quits the program
-            exit()
+            print ("Sorry you are not of the correct age to be a spy")
+    else:
 
-user=input("Do you want to continue with the default user ?(Y/N)")
-if user=="Y":
-    from spydetails import spy_name
-    from spydetails import spy_salutation
-    from spydetails import spy_age
-    from spydetails import spy_rating
-    print ("Welcome, %s %s with %d years of age and %d rating. Welcome to spyChat..." % (spy_salutation, spy_name, spy_age, spy_rating))
-else:
-    new_user=1
-    spychat()  ######taking details of new user
-spy_chat()
-
+        print ("A spy needs to have a valid name. Try again please.")

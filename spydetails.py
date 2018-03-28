@@ -1,6 +1,14 @@
-spy_name="Neeti Mehra"
-spy_salutation="Miss."
-full_name=spy_salutation + " " + spy_name
-spy_age=20
-spy_rating=4
-status = "You are in..."
+from datetime import datetime
+
+class Spy:
+
+    def __init__(self, name, salutation, age, rating):
+        self.name = name
+        self.salutation = salutation
+        self.age = age
+        self.rating = rating
+        self.is_online = True
+        self.chats = []
+        self.current_status_message = None
+
+spy = Spy('Neeti', 'Ms.', 20, 4.5)
