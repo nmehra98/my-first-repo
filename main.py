@@ -1,6 +1,7 @@
 from steganography.steganography import Steganography
 from datetime import datetime
 import spy_details
+import csv
 
 print 'Let\'s get started...'
 
@@ -107,13 +108,23 @@ def add_status(current_status_message):
 def add_friend():
     #new_friend = {"Name": "", "Salutation": "", "age": 0, "Rating": 0.0, "Chats": [] }
     Name=raw_input("Whats your friend spy name?")
-    Salutation=raw_input("what would be the salutation, Mr. or Mrs??")
+    Salutation=raw_input("what would be the salutation, Mr. or Ms??")
     #Name= new_friend["Salutation"] + " " + new_friend["Name"]
     age = int(input("what is friends age?"))
     Rating= float(input("what's your friend spy rating??"))
     if len(Name) > 0 and 12 < age < 50:  # add friend
         friend_no=spy_details.Spy(Name,Salutation,age,Rating)
         Friends.append(friend_no)
+
+        with open('friends.csv','a')as friends_data:
+            writer = csv.writer(friends_data)
+            writer.writerow([friend_no.Name,friend_no.Salutation,friend_no.age,friend_no.Rating])
+
+    #    with open('friends.csv','rb')as friends_data:
+     #        reader = csv.reader(friends_data)
+      #       for row in reader:
+       #          print row
+
     else:      #####invalid details
         print("Sorry we can't add your friend's details please try again.")
     return len(Friends)
@@ -148,6 +159,10 @@ def send_message():
     text = "You : " + text
     chat=spy_details.ChatMessage(text,True)
     Friends[selection]["Chats"].append(chat)
+
+   # with open('chats.csv','a')as friends_data:
+    #    writer = csv.writer(friends_data)
+     #   writer.writerow([chat.message,chat.time,chat.sent_by_me])
 
 
 #####receiving message#####
