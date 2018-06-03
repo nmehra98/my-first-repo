@@ -1,193 +1,204 @@
-from steganography.steganography import Steganography
-from datetime import datetime
-import spy_details
-import csv
+from tweepy import *
+from textblob import TextBlob
+import re
+from collections import Counter
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import nltk
+nltk.download('stopwords')
 
-print 'Let\'s get started...'
+#####Consumer KEY#####
+Consumer_key = "F43MOmXsBBheE8FBfhNOcGpk7"
 
-#####asking name#####
-def entry():
-    spy_name =raw_input("Welcome to spy chat, you must tell me your spy name first: ")
-    if len(spy_name) > 0:
-        print 'Welcome ' + spy_name + '. Glad to have you back with us.'
+#### Consumer_SECRET ####
+Consumer_secret = "c2v3oe4w4NYY40EbhwSvTFI6fXzZWD0MGvQeX4duB3RWEUE5Fv"
 
-   #####providing salutation######
-        spy_salutation =raw_input("What should we call you (Mr. or Ms.)?")
-        spy_salutation + " " + spy_name
-        spy_name = spy_salutation + " " + spy_name
-        print(spy_name)
-        print "Alright " + " " + spy_name +". I'd like to know a little bit more about you before we proceed..."
-    else:
-        print "A spy needs to have a valid name. Try again please."
+### Token ###
+Token_Key = "989908304401842176-Lhe1Wu98R7sDnhejYKVZP5ztIgYK4f2"
 
-#####further details#####
-    spy_age = 0
-    spy_rating = 0.0
-    spy_is_online = False
-#####asking age#####
-    spy_age = input("What is your age?")
-    if spy_age > 12 and spy_age < 50:
-        spy_rating = float(input("What is your spy rating?"))
-    else:
-        print 'Sorry you are not of the correct age to be a spy'
-    if spy_rating > 4.5:
-        print 'Great ace!'
-    elif spy_rating > 3.5 and spy_rating <= 4.5:
-        print 'You are one of the good ones.'
-    elif spy_rating >= 2.5 and spy_rating <= 3.5:
-        print 'You can always do better'
-    else:
-        print 'We can always use somebody to help in the office.'
-    spy_is_online = True
-    print 'Authentication complete. Welcome ', spy_name
-    print 'Your age =' , spy_age
-    print 'Your spy rating=',spy_rating
+### Token KEY ###
+Token_secret = "rso49nBdaQvGW89QiXvrAawhX0CCgBxV3wYqm0blqDWpY"
 
-#################################
 
-def spy_chat():
-    show_menu=True
-    current_status_message=None
-    while show_menu:
-        print ("What do you want to do?")
-        menu_choices="1. Add a status update \n2. Add a friend \n3. Send message \n4. Receive message \n5. Exit the application \nInput:-"
-        menu_choice=raw_input(menu_choices)
-        if menu_choice=="1":
-            current_status_message=add_status(current_status_message)
-        elif menu_choice=="2":
-            no=add_friend()   ###no of friends returned
-            print ("No. of friends: %d" % no)
-        elif menu_choice == "3":
-            send_message()
-        elif menu_choice=="4":
-            read_message()
-        elif menu_choice=="5":
-            print ("Quitting...")   ####quits the program
-            show_menu=False
-        else:
-            print("Invalid input.")
+def retrieve_tweets() :   ####To retrieve the required tweets
+    query = input("Enter the keyowords without hashtag :") ###ask for the query to search on twitter
+    query = "#" + query      ####Adding a "#" for better search results
+    Tweets = api.search(q=query, screen_name="@realdonaldtrump",  lang="en") ### Searching the twitter
+    return Tweets
+
+
+def print_tweets(tweets):   # For printing the tweets
+    for data in tweets:
+        tweet = TextBlob(data.text)
+        print(tweet)
+        print(tweet.sentiment)      # For analysis of sentiments
+        print("Done at :" + str(data.created_at))    # Print the time for the creation of tweet
+        print("Username :"+data.user.name)          # Print the user name of the twitter user
+        print("---------------------------------------------")
+
+
+def no_of_followers(Tweet):
+    print("Printing no of followers :-\nUSER        No of Followers")
+    total = 0
+    for data in Tweet:
+        print(data.user.name + "     " + str(data.user.followers_count))
+        total = total + data.user.followers_count
+    print("Total no of persons effected by the Tweets:" + str(total))
+
+
+def extract_for_user():        # Extracts tweets for perticular user
+    query = input("Enter the onscreen name of the user with an '@' in the front:")
+    Tweets = api.user_timeline(screen_name=query, count=200)    # Search for tweets by the given screen name
+    print_tweets(Tweets)
+
+
+def search_for_keywords():      # search the tweets  for particular keyword in the tweets by a particular user
+    user = input("Enter the name of the user:")
+    query = []      # Stores the keywords to be searched for
+    tweets = []    # to store the tweets
+    tweets2 = []         # to store modified tweets
+    shows = True
+    while shows:       # to store the no of keywords till we want
+        qw = input("Enter  the keywords ro be searched for :")
+        query.append(qw)
+        ask = input("Do you want to add more keywords?(Y/N)")
+        ask = ask.upper()
+        if ask == "Y":
             pass
-
-#####status updation#####
-
-def add_status(current_status_message):
-    if current_status_message is not None:
-        print("Your current status is: %s" % current_status_message)
-    else:
-        print("You don't have any status right now.")
-    default=raw_input("Do you want to select from the previous statement?(Y/N)")
-    if default.upper()=='N':
-        new_status_message=raw_input("Which status you want to set?")
-        if len(new_status_message)>0:
-            updated_status_message=new_status_message        ###update status###
-            STATUS_MESSAGE.append(updated_status_message)     ###Enter in the list
-            print(updated_status_message + " : is now set as your as status")
+        elif ask == "N":
+            shows = False
         else:
-            print("Please enter a valid status...")     ###invalid status###
-            updated_status_message=current_status_message     ###assign previous status
-            print(updated_status_message + " : Remains as your as status")
-    elif default.upper()=='Y':
-        item_position=1
-        for message in STATUS_MESSAGE:
-            print("%d . %s" % (item_position, message))
-            item_position=item_position+1
-        menu_selection=int(input("What is your desired status?"))
-        if len(STATUS_MESSAGE)>=menu_selection:
-            updated_status_message=STATUS_MESSAGE[menu_selection-1]   ###set desired status###
-            print(updated_status_message + " : is now set as your as status")  # print desired stat
+            print("invalid input  \n"
+                  "Taking default input as 'No' ")
+            shows = False
+    result = api.user_timeline(screen_name=user, count=200)   # searches for the 200 tweets by the perticular user
+    for data in result:
+        tweets.append(data)
+    oldest = tweets[-1].id      # stores the id of the last tweet retrieved
+    oldest_at = tweets[-1].created_at   # Stores the time and date of the last tweet retrieved
+    qu = True
+    while qu:       # to retrieve more older tweets
+        qu2 = input("Do you want  more  tweets older than "+str(oldest_at)+"(Y/N)  :")
+        qu2 = qu2.upper()
+        if qu2 == "Y":
+            result2 = api.user_timeline(screen_name=user, count=200, max_id=oldest)  # retrieve the tweet older then the given tweet id
+            for data in result2:
+                tweets.append(data)     # appended the new tweets retrived
+            oldest = tweets[-1].id
+            oldest_at = tweets[-1].created_at
+        elif qu2 == "N":
+            qu = False
         else:
-            print("Invalid input...")
-            updated_status_message=current_status_message   ###assign previous status###
+            print("invalid input  \n"
+                  "Taking default input as 'No' ")
+            qu = False
+    count = -1
+    for tweet1 in tweets:
+        count = count + 1       # starts the list from beginning
+        tweet = tweet1.text
+        tweet = re.sub(r"http\S+", "", tweet)  # removes the URL from the text of tweet
+        tweets[count].text = tweet
+    for keyword in query:
+        for data in tweets:
+            tex = TextBlob(data.text)
+            qw = tex.find(keyword)
+            if qw != -1:
+                tweets2.append(data)    # Appends the modified tweets
+            else:
+                pass
+    if len(tweets2) > 0:
+        print_tweets(tweets2)
     else:
-        print("Invalid input")
-        pass
-    return updated_status_message
+        print("No tweet found with the related keywords")
 
-#####Friend function start#####
 
-def add_friend():
-    #new_friend = {"Name": "", "Salutation": "", "age": 0, "Rating": 0.0, "Chats": [] }
-    Name=raw_input("Whats your friend spy name?")
-    Salutation=raw_input("what would be the salutation, Mr. or Ms??")
-    #Name= new_friend["Salutation"] + " " + new_friend["Name"]
-    age = int(input("what is friends age?"))
-    Rating= float(input("what's your friend spy rating??"))
-    if len(Name) > 0 and 12 < age < 50:  # add friend
-        friend_no=spy_details.Spy(Name,Salutation,age,Rating)
-        Friends.append(friend_no)
+def send_message():     # Sends direct message to a particular user
+    user = raw_input("Enter the user name of the person :")
+    message = raw_input("Enter the message to be send :")
+    api.send_direct_message(screen_name=user, text=message)
 
-        with open('friends.csv','a')as friends_data:
-            writer = csv.writer(friends_data)
-            writer.writerow([friend_no.Name,friend_no.Salutation,friend_no.age,friend_no.Rating])
 
-    #    with open('friends.csv','rb')as friends_data:
-     #        reader = csv.reader(friends_data)
-      #       for row in reader:
-       #          print row
+def extract_info():     # Extract info from the tweets
+    tweet = retrieve_tweets()
+    location = []
+    for data in tweet:
+        tb = TextBlob(data.text)
+        print("language of Tweet :"+tb.detect_language()+"\t timezone :" + str(data.user.time_zone))  # Extract language and timezone for the tweets
+        loc = data.user.location    # Extract location from user info
+        location.append(loc)
+    word_counts = Counter(location)
+    print("location \t No of occurences ")
+    common_loc = word_counts.most_common(5)    # passes the 5 most common locaton to the common_loc list
+    for data in common_loc:
+        print(data)
+    print("Blank space indicates no location defined by the user")
 
-    else:      #####invalid details
-        print("Sorry we can't add your friend's details please try again.")
-    return len(Friends)
 
-def select_a_friend():
-    item_no = 0
-    if len(Friends)!=0:
-        for friend in Friends:
-            print("%d . %s" % (item_no+1, friend.Name))
-            item_no = item_no + 1
-        friend_no = int(input("Select your Friend : "))
-        if friend_no<=len(Friends) and friend_no!=0:
-            print("You selected %d no Friend" % friend_no)
-            return friend_no-1
+def remove_stopwords():      # removes the stopwords from the retrieved tweets
+    tweet1 = retrieve_tweets()
+    stop_words = set(stopwords.words('english'))        # set the stopwords to be used
+    for data in tweet1:
+        data.text = data.text.lower()
+        word_tokens = word_tokenize(data.text)  # split the text in different words
+        filtered_sentence = []      # stores the filtered text
+        for w in word_tokens:
+            if w not in stop_words:      # if the word is not in the stopwords list then it is appended to the filtered_sentance
+                filtered_sentence.append(w)
+        msg = " ".join(map(str, filtered_sentence))      # join the different words in a list to for a sentance
+        data.text = msg
+    data1 = []    # To Extend the words in the tweets
+    for data in tweet1:
+        data2 = data.text.split(" ", 30)       # Spliting the data in different words
+        data1.extend(data2)     # extending in data 1
+    print_tweets(tweet1)
+    word = Counter(data1)
+    print("Printing the top 10 words appearing in the tweets:")
+    top10 = word.most_common(10)
+    for data in top10:
+        print(data)
+
+
+def tweet_on_Twitter():
+    text = raw_input("What do you want to tweet")
+    api.update_status(text)
+
+    auth = OAuthHandler(Consumer_key, Consumer_secret)       # authorises the twitter handle
+    auth.set_access_token(Token_Key, Token_secret)          # Passes the access tokens and the key
+
+    api = API(auth)     # check for Authorization
+    menu_display = True
+    while menu_display:
+        menuchoice = int(input('Choices are: \n1.Extract tweets for the defined keywords and find the total no of persons'
+                           'effected by the Tweets  \n'
+                           '2.Extract Tweets for a specified user \n'
+                           '3.Search for specified words in tweets by the specified users \n'
+                           '4.Extract location , language and time zone for the retrieved tweets and print the most'
+                           'occurring locations \n'
+                           '5.Send a direct message to someone \n'
+                           '6.Remove stopWords from retrieved tweets \n'
+                           '7.Tweet a message\n'
+                           '8.Exit \n'
+                           'Enter your choice :\t '))
+
+        if menuchoice == 1:
+            tweet = retrieve_tweets()
+            print_tweets(tweet)
+        elif menuchoice == 2:
+            extract_for_user()
+        elif menuchoice == 3:
+            search_for_keywords()
+        elif menuchoice == 4:
+            extract_info()
+            pass
+        elif menuchoice == 5:
+            send_message()
+        elif menuchoice == 6:
+            remove_stopwords()
+        elif menuchoice == 7:
+            tweet_on_Twitter()
+        elif menuchoice == 8:
+            menu_display = False
+            exit()
         else:
-            print("Wrong raw_input, please try again...")
-    else:
-        print("Sorry no Friend added till now, plz add a friend first...")
-        friend_no=add_friend()
-        print("No. of Friends: %d" % friend_no)
-        select_a_friend()
+            print("illegal choice, plz retry.")
 
-#####sending message#####
-
-def send_message():
-    selection = select_a_friend();
-    image = raw_input("Name of image to be encoded :")
-    out_path = "abc1.jpg"
-    text = raw_input("what text do you want to encode :")
-    Steganography.encode(image, out_path, text)
-    print("Message sent... ")
-    text = "You : " + text
-    chat=spy_details.ChatMessage(text,True)
-    Friends[selection]["Chats"].append(chat)
-
-   # with open('chats.csv','a')as friends_data:
-    #    writer = csv.writer(friends_data)
-     #   writer.writerow([chat.message,chat.time,chat.sent_by_me])
-
-
-#####receiving message#####
-
-def read_message():
-    selection = select_a_friend()
-    image = raw_input("Name of image to be decoded : ")
-    text = Steganography.decode(image)
-    text = Friends[selection]["Name"] + " : " + text
-    chat = spy_details.ChatMessage(text, True)
-    Friends[selection]["Chats"].append(chat)
-    print(text)
-
-
-user=raw_input("Do you want to continue with the default user ?(Y/N)")
-new_user=0
-if user=="Y":
-    #####import the default spy objects
-    from spy_details import spy
-    print('Welcome,%s  %s with %d years of age and %.1f rating. Welcome to SpyChat.... ' % (spy.Salutation, spy.Name, spy.age, spy.Rating))
-    from spy_details import friend_one,friend_three,friend_two
-    Friends=[friend_one, friend_two, friend_three]
-else:
-    new_user=1
-    entry()  ######taking details of new user
-STATUS_MESSAGE=['You are in...', 'How are you..?', 'Lets move further']
-Friends=[]
-spy_chat()
